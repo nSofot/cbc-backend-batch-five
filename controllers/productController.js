@@ -73,3 +73,27 @@ export async function deleteProduct(req, res) {
         })
     }
 }
+
+export async function updateProduct(req, res) {
+    if(!isAdmin(req))
+    {
+        res.status(403).json({
+            message : "You are not authorized to update products"
+        })
+        return
+    }   
+
+    try{
+        await Product.updateOne({productId : req.body.productId},req.body)
+
+        res.json({    
+            message : "Product updated successfully"
+        })
+    }
+    catch(err){
+        res.status(500).json({
+            message : "Failed to update product",
+            error: err
+        })
+    }
+}
