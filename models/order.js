@@ -35,24 +35,27 @@ const orderSchema = new mongoose.Schema({
         type : Number, 
         required : true
     },
-    product : [
+    products : [
         {
-            productId : {
-                type : String, 
-                required : true
-            },
-            name : {
-                type : String, 
-                required : true
-            },
-            price : {
-                type : Number, 
-                required : true
-            },
-            quantity : {
-                type : Number, 
-                required : true
+            productInfo : {
+                productId : {
+                    type : String, 
+                    required : true
+                },
+                name : {
+                    type : String, 
+                    required : true
+                },
+                price : {
+                    type : Number, 
+                    required : true
+                },
+                quantity : {
+                    type : Number, 
+                    required : true
+                }
             }
+
         }
     ],
     createdAt : {
