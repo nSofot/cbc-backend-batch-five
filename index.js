@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import productRouter from "./Routes/productRouter.js";
 import userRouter from "./Routes/userRouter.js";
+import orderRouter from "./Routes/orderRouter.js";
 import jwt from "jsonwebtoken";
 
 
@@ -48,6 +49,7 @@ mongoose.connect("mongodb+srv://admin:123@cluster0.kglmvyg.mongodb.net/?retryWri
 app.use("/product", productRouter);
 app.use("/user", userRouter);
 app.use("/user/login", userRouter);
+app.use("/order", orderRouter);
 
 
 app.listen(3000, () => {
