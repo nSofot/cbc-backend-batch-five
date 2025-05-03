@@ -1,6 +1,8 @@
 import User from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
 export function createUser(req, res) {
 
@@ -22,7 +24,7 @@ export function createUser(req, res) {
     }
 
 
-    const hashpassword = bcrypt.hashSync("Gorilla#2025"+req.body.password, 10);
+    const hashpassword = bcrypt.hashSync(process.env.JWT_KEY+req.body.password, 10);
 
     const user = new User({
         email: req.body.email,
@@ -52,7 +54,7 @@ export function createUser(req, res) {
 
 export function loginUsers(req, res) {
     const email = req.body.email
-    const password = "Gorilla#2025"+req.body.password
+    const password = process.env.JWT_KEY+req.body.password
 
     User.findOne({ email: email })
     .then(
@@ -75,7 +77,7 @@ export function loginUsers(req, res) {
                             role: user.role,
                             Image: user.Image
                         },
-                        "nsoft-tec#2025",
+                        process.env.JWT_KEY,
                         )
                     })
                 } else {
@@ -83,20 +85,7 @@ export function loginUsers(req, res) {
                         message: "User is not active"
                     })
                 }
-                // const token = jwt.sign(
-                // {
-                //     email: user.email,
-                //     firstname: user.firstname,
-                //     lastname: user.lastname,
-                //     role: user.role,
-                //     Image: user.Image
-                // },
-                // "nsoft-tec#2025",
-                // )
-                // res.status(200).json({
-                //     message: "Login successful",
-                //     token : token
-                // })
+
             } else {
                 res.status(401).json({
                     message: "Invalid password"
