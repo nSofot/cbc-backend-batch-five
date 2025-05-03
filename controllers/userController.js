@@ -30,9 +30,10 @@ export function createUser(req, res) {
         lastname: req.body.lastname,
         password: hashpassword,
         role: req.body.role,
-        status: req.body.status,
+        isActive: req.body.isActive,
         Image: req.body.Image,
-        createdAt: req.body.createdAt
+        createdAt: req.body.createdAt,
+        modifiedAt: req.body.modifiedAt
     });
     
     user
@@ -63,20 +64,39 @@ export function loginUsers(req, res) {
         } else {
             const isPasswordValid = bcrypt.compareSync(password, user.password)
             if (isPasswordValid) {
-                const token = jwt.sign(
-                {
-                    email: user.email,
-                    firstname: user.firstname,
-                    lastname: user.lastname,
-                    role: user.role,
-                    Image: user.Image
-                },
-                "nsoft-tec#2025",
-                )
-                res.status(200).json({
-                    message: "Login successful",
-                    token : token
-                })
+                if(user.isActive) {
+                    res.status(200).json({
+                        message: "Login successful",
+                        token : jwt.sign(
+                        {
+                            email: user.email,
+                            firstname: user.firstname,
+                            lastname: user.lastname,
+                            role: user.role,
+                            Image: user.Image
+                        },
+                        "nsoft-tec#2025",
+                        )
+                    })
+                } else {
+                    res.status(401).json({
+                        message: "User is not active"
+                    })
+                }
+                // const token = jwt.sign(
+                // {
+                //     email: user.email,
+                //     firstname: user.firstname,
+                //     lastname: user.lastname,
+                //     role: user.role,
+                //     Image: user.Image
+                // },
+                // "nsoft-tec#2025",
+                // )
+                // res.status(200).json({
+                //     message: "Login successful",
+                //     token : token
+                // })
             } else {
                 res.status(401).json({
                     message: "Invalid password"
@@ -86,12 +106,37 @@ export function loginUsers(req, res) {
     ))
 }
 
+export async function getUsers(req,res) {
+    try{
+        if(isAdmin(req)){
+            const user = await User.find()
+            res.json(products)
+        }
+        else{
+            const user = await User.find({isActive : true})
+            res.json(user)
+        }
+
+    }
+    catch(err){
+        res.status(500).json({
+            message : "Error getting users",
+            error: err
+        })
+    }
+}
+
+
 export function isAdmin(req) {
     if(req.user == null) {
         return false
     }
 
     if(req.user.role != "admin") {
+        return false
+    }
+
+    if(!req.user.isActive) {
         return false
     }
     return true

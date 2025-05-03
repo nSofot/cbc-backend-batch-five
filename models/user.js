@@ -21,18 +21,22 @@ const userSchema = new mongoose.Schema({
     role: { 
         type: String, 
         required: true, 
-        default: "User" 
+        default: "user" 
     },
-    status: { 
-        type: String, 
+    isActive: { 
+        type: Boolean, 
         required: true, 
-        default: "Active" 
+        default: true
     },
     Image: { 
         type: String, 
         required: false, 
         default: "https://avatar.iran.liara.run/public/boy?username=Ash"},
     createdAt: { 
+        type: Date, 
+        default: Date.now 
+    },
+    modifiedAt: { 
         type: Date, 
         default: Date.now 
     }
