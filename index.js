@@ -37,7 +37,6 @@ app.use(
     }
 )
 
-//"mongodb+srv://admin:123@cluster0.ykfz5tz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
 mongoose.connect(process.env.MONGODB_URL)
 .then(() => {

@@ -6,6 +6,7 @@ dotenv.config();
 
 export function createUser(req, res) {
 
+    /*
     if(req.body.role != "admin") {
         if(req.user !=null){
             if(req.user.role != "admin") {
@@ -22,7 +23,7 @@ export function createUser(req, res) {
             return
         }
     }
-
+*/
 
     const hashpassword = bcrypt.hashSync(process.env.JWT_KEY+req.body.password, 10);
 
@@ -35,14 +36,14 @@ export function createUser(req, res) {
         isActive: req.body.isActive,
         Image: req.body.Image,
         createdAt: req.body.createdAt,
-        modifiedAt: req.body.modifiedAt
+        updatedAt: req.body.updatedAt
     });
-    
+
     user
     .save()
     .then(() => {
         res.json({
-            message: "User added"
+            message: "User added successfully"
         });    
     })
     .catch(() => {
@@ -78,7 +79,8 @@ export function loginUsers(req, res) {
                             Image: user.Image
                         },
                         process.env.JWT_KEY,
-                        )
+                        ),
+                        role : user.role
                     })
                 } else {
                     res.status(401).json({
@@ -125,8 +127,8 @@ export function isAdmin(req) {
         return false
     }
 
-    if(!req.user.isActive) {
-        return false
-    }
+    // if(!req.user.isActive) {
+    //     return false
+    // }
     return true
 }
