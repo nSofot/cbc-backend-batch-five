@@ -24,7 +24,6 @@ export async function createOrder(req, res) {
 
     if (lastOrder.length > 0) {
         const lastOrderId = lastOrder[0].orderId
-        //const lastOrderIdNumber = lastOrderId.slice(3)
         const lastOrderIdNumber = parseInt(lastOrderId.replace("CBC", ""))
         const neworderIdNumber = (parseInt(lastOrderIdNumber)+1)
         orderId = "CBC"+String(neworderIdNumber).padStart(4, '0')
@@ -37,35 +36,47 @@ export async function createOrder(req, res) {
         const products = []
 
         for (let i = 0; i < orderInfo.products.length; i++) {
+            const productEntry = orderInfo.products[i];
+            // const productId = productEntry.productInfo?.productId;
+            // const quantity = productEntry.productInfo?.quantity;
+            const productId = orderInfo.products[i].productId;
+            const quantity = orderInfo.products[i].quantity;
 
-            const item = await Product.findOne({productId : orderInfo.products[i].productId})
 
-            if (item == null) {
-                res.status(404).json({
-                    message : "Product with id "+orderInfo.products[i].productId+" not found"
-                })
-                return
+            if (!productId || quantity == null) {
+                res.status(400).json({
+                    message: "Invalid product entry: missing productId or quantity"
+                });
+                return;
             }
 
-            if(!item.isAvailable) {
+            const item = await Product.findOne({ productId: productId });
+
+            if (!item) {
                 res.status(404).json({
-                    message : "Product with id "+orderInfo.products[i].productId+" is not available"
-                })
-                return
+                    message: `Product with id ${productId} not found`
+                });
+                return;
+            }
+
+            if (!item.isAvailable) {
+                res.status(404).json({
+                    message: `Product with id ${productId} is not available`
+                });
+                return;
             }
 
             products[i] = {
-                productInfo : {
-                    productId : item.productId,
-                    name : item.name,
-                    price : item.price,
-                    quantity : orderInfo.products[i].qty
-                },
+                productInfo: {
+                    productId: item.productId,
+                    name: item.name,
+                    price: item.price,
+                    quantity: quantity
+                }
+            };
 
-            }
-
-            total += item.price * orderInfo.products[i].qty
-            labelledTotal += item.labelledPrice * orderInfo.products[i].qty
+            total += item.price * quantity;
+            labelledTotal += item.labelledPrice * quantity;
         }
 
         const order = new Order({
@@ -94,3 +105,30 @@ export async function createOrder(req, res) {
         })
     }     
 }
+
+export async function getOrders(req, res) {
+
+    if(req.user == null) {
+        res.status(403).json({
+            message : "Please login and try again"
+        })
+        return
+    }
+    try{
+        if(req.user.role == "admin") {
+            const orders = await Order.find()
+            res.json(orders)
+        }
+        else {
+            const orders = await Order.find({email : req.user.email})
+            res.json(orders)
+        }
+
+    }
+    catch(err){
+        res.status(500).json({
+            message : "Error getting orders",
+            error: err
+        })
+    }
+}   

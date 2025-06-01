@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema({
     },
     email : {
         type : String, 
-        required : true
+
     },
     name : {
         type : String, 
@@ -29,11 +29,11 @@ const orderSchema = new mongoose.Schema({
     },
     total : {
         type : Number, 
-        required : true
+        // required : true
     },
     labelledTotal : {
         type : Number, 
-        required : true
+        // required : true
     },
     products : [
         {
@@ -44,11 +44,11 @@ const orderSchema = new mongoose.Schema({
                 },
                 name : {
                     type : String, 
-                    required : true
+                    // required : true
                 },
                 price : {
                     type : Number, 
-                    required : true
+                    // required : true
                 },
                 quantity : {
                     type : Number, 
