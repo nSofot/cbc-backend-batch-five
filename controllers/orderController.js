@@ -37,11 +37,8 @@ export async function createOrder(req, res) {
 
         for (let i = 0; i < orderInfo.products.length; i++) {
             const productEntry = orderInfo.products[i];
-            // const productId = productEntry.productInfo?.productId;
-            // const quantity = productEntry.productInfo?.quantity;
-            const productId = orderInfo.products[i].productId;
-            const quantity = orderInfo.products[i].quantity;
-
+            const productId = orderInfo.products[i].productInfo.productId;
+            const quantity = orderInfo.products[i].productInfo.quantity;
 
             if (!productId || quantity == null) {
                 res.status(400).json({
@@ -70,10 +67,15 @@ export async function createOrder(req, res) {
                 productInfo: {
                     productId: item.productId,
                     name: item.name,
-                    price: item.price,
-                    quantity: quantity
-                }
+                    altNames: item.altNames,
+                    description: item.description,
+                    images: item.images,
+                    labelledPrice: item.labelledPrice,
+                    price: item.price
+                },
+                quantity: quantity
             };
+
 
             total += item.price * quantity;
             labelledTotal += item.labelledPrice * quantity;
