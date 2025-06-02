@@ -67,9 +67,9 @@ export async function createOrder(req, res) {
                 productInfo: {
                     productId: item.productId,
                     name: item.name,
-                    altNames: item.altNames,
+                    altNames: Array.isArray(item.altName) ? item.altName : [item.altName],
                     description: item.description,
-                    images: item.images,
+                    images: Array.isArray(item.image) ? item.image : [item.image],
                     labelledPrice: item.labelledPrice,
                     price: item.price
                 },
