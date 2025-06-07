@@ -134,3 +134,58 @@ export async function getOrders(req, res) {
         })
     }
 }   
+
+// export async function updateOrderStatus(req, res) {
+//     if(!isAdmin(req)) {
+//         res.status(403).json({
+//             message : "You are not authorized to update orders"
+//         });
+//         return;
+//     }   
+//     try{
+//         const orderId = req.params.orderId
+//         const status = req.params.status
+
+//         await Order.updateOne(
+//             {orderId : orderId},
+//             {status : status}
+//         )
+
+//         res.json({
+//             message : "Order status updated successfully"
+//         })
+//     }
+//     catch(e){
+//         res.status(500).json({
+//             message : "Error updating order status",
+//             error: e,
+//         })
+//         return;
+//     }
+// }
+
+// Example Express controller
+export async function updateOrderStatus(req, res) {
+	const { orderId, status } = req.params;
+	try {
+		// Validate orderId and status
+		if (!["pending", "delivered", "cancelled", "returned", "refunded"].includes(status)) {
+			return res.status(400).json({ message: "Invalid status" });
+		}
+
+		const order = await Order.findOneAndUpdate(
+			{ orderId },
+			{ status },
+			{ new: true }
+		);
+
+		if (!order) {
+			return res.status(404).json({ message: "Order not found" });
+		}
+
+		res.json({ message: "Status updated", order });
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ message: "Server error" });
+	}
+};
