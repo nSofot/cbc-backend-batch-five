@@ -1,21 +1,30 @@
 import User from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
 import axios from "axios";
 import nodemailer from "nodemailer";
 import OTP from "../models/otp.js";
+import dotenv from 'dotenv';
 dotenv.config();
+
+
 
 export async function createUser(req, res) {
     try {
-        if (req.body.role === "admin") {
-            if (!req.user || req.user.role !== "admin") {
-                return res.status(403).json({ message: "You are not authorized to add admin account" });
-            }
-        } else {
-            if (!req.user) {
-                return res.status(403).json({ message: "You are not authorized to add users. Please login first" });
+        if (req.body.role == "admin") {
+            if (req.user != null) {
+                if (req.user.role != "admin"){
+                    res.status(403).json({
+                    message : "You are not authorized to create an admin accounts"
+                })
+                return
+                }
+                else{
+                    res.status(403).json({
+                        message : "You are not authorized to create an admin accounts. Please login first"
+                    })
+                    return
+                }
             }
         }
 
@@ -24,8 +33,7 @@ export async function createUser(req, res) {
             return res.status(409).json({ message: "Email already exists" });
         }
 
-        const hashpassword = bcrypt.hashSync(process.env.JWT_KEY + req.body.password, 10);
-
+        const hashpassword = bcrypt.hashSync(import.meta.env.JWT_KEY + req.body.password, 10);
         const user = new User({
             email: req.body.email,
             firstname: req.body.firstname,
@@ -47,9 +55,51 @@ export async function createUser(req, res) {
     }
 }
 
+
+export async function createGoogleUser(req, res) {
+    const token = req.body.accessToken;
+    if (!token) {
+        return res.status(400).json({ message: "Access token is required" });
+    }
+
+    try {
+        const response = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const { email, given_name, family_name, picture } = response.data;
+        const password = "googleUser";
+
+        const existingUser = await User.findOne({ email: email });
+        if (existingUser) {
+            return res.status(409).json({ message: "Email already exists" });
+        }
+
+        const hashpassword = bcrypt.hashSync(process.env.JWT_KEY + password, 10);
+        const user = new User({
+            email,
+            firstname: given_name,
+            lastname: family_name || given_name,
+            password: hashpassword,
+            Image: picture,
+            role: "user",
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
+
+        await user.save();
+        res.json({ message: "User added successfully", token: "dummy" }); // send dummy token for now
+
+    } catch (err) {
+        res.status(500).json({ message: "User not added", error: err.message });
+    }
+}
+
+
 export async function loginUsers(req, res) {
     const { email, password } = req.body;
-    const hashedInput = process.env.JWT_KEY + password;
+    const hashedInput = process.env.JWT_KEY + password; // <-- ✅ Corrected
 
     try {
         const user = await User.findOne({ email });
@@ -66,7 +116,7 @@ export async function loginUsers(req, res) {
             lastname: user.lastname,
             role: user.role,
             Image: user.Image
-        }, process.env.JWT_KEY);
+        }, process.env.JWT_KEY); // <-- ✅ Still correct here
 
         res.status(200).json({ message: "Login successful", token, role: user.role });
 
@@ -74,6 +124,7 @@ export async function loginUsers(req, res) {
         res.status(500).json({ message: "Login failed", error: err });
     }
 }
+
 
 export async function getUsers(req, res) {
     try {
@@ -101,11 +152,20 @@ export async function loginWithGoogle(req, res) {
 
         let user = await User.findOne({ email });
 
+        const jwtToken = jwt.sign({
+            email: user.email,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            role: user.role,
+            Image: user.Image
+        }, process.env.JWT_KEY);
+
         res.json({
             message: "Login successful",
             token: jwtToken,
             role: user.role,
         });
+
     } catch (err) {
         console.error("Google Login Failed:", err.response?.data || err.message);
         res.status(500).json({ message: "Google login failed", error: err.message });
@@ -171,7 +231,7 @@ export async function resetPassword(req, res) {
 
         await OTP.deleteMany({ email });
 
-        const hashedPassword = bcrypt.hashSync(newPassword, 10);
+        const hashedPassword = bcrypt.hashSync(process.env.JWT_KEY + newPassword, 10);
         await User.updateOne({ email }, { password: hashedPassword });
 
         res.json({ message: "Password has been reset successfully" });
