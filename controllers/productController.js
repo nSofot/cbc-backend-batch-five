@@ -1,3 +1,4 @@
+import { syncIndexes } from "mongoose";
 import Product from "../models/product.js";
 import { isAdmin } from "./userController.js";
 
@@ -135,4 +136,30 @@ export async function updateProduct(req, res) {
             error: err
         })
     }
+}
+
+export async function searchProducts(req, res) {
+	const searchQuery = req.query.query || "";
+
+	try {
+		const regex = { $regex: searchQuery, $options: "i" };
+
+		const filter = {
+			isAvailable: true,
+			...(searchQuery.trim() !== "" && {
+				$or: [
+					{ name: regex },
+					{ altName: { $elemMatch: regex } }
+				]
+			})
+		};
+
+		const products = await Product.find(filter);
+		res.json(products);
+	} catch (err) {
+		res.status(500).json({
+			message: "Error searching products",
+			error: err
+		});
+	}
 }
