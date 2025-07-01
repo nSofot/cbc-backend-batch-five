@@ -241,6 +241,19 @@ export async function resetPassword(req, res) {
     }
 }
 
+
+export function gettingUser(req, res) {
+    if (req.user === null || req.user === undefined) {
+        return res.status(403).json({ message: "You are not authorized to perform this action" });
+    }
+
+    console.log(req.user);
+    return res.json({
+        ...req.user
+    });
+}
+
+
 export function isAdmin(req) {
     return req.user && req.user.role === "admin";
 }
