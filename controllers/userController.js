@@ -126,16 +126,6 @@ export async function loginUsers(req, res) {
 }
 
 
-export async function getUsers(req, res) {
-    try {
-        const users = isAdmin(req) ? await User.find() : await User.find({ isActive: true });
-        res.json(users);
-    } catch (err) {
-        res.status(500).json({ message: "Error getting users", error: err });
-    }
-}
-
-
 export async function loginWithGoogle(req, res) {
     const token = req.body.accessToken;
 
@@ -242,7 +232,16 @@ export async function resetPassword(req, res) {
 }
 
 
-export function gettingUser(req, res) {
+// export async function getUsers(req, res) {
+//     try {
+//         const users = isAdmin(req) ? await User.find() : await User.find({ isActive: true });
+//         res.json(users);
+//     } catch (err) {
+//         res.status(500).json({ message: "Error getting users", error: err });
+//     }
+// }
+
+export function getUser(req, res) {
     if (req.user === null || req.user === undefined) {
         return res.status(403).json({ message: "You are not authorized to perform this action" });
     }
