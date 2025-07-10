@@ -4,6 +4,8 @@ import mongoose, { mongo } from "mongoose";
 import productRouter from "./Routes/productRouter.js";
 import userRouter from "./Routes/userRouter.js";
 import orderRouter from "./Routes/orderRouter.js";
+// import reviewRouter from "./Routes/reviewsRouter.js";
+
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -52,6 +54,7 @@ app.use("/api/products", productRouter);
 app.use("/api/user", userRouter);
 app.use("/api/user/login", userRouter);
 app.use("/api/order", orderRouter);
+// app.use("/api/reviews", reviewRouter);
 
 
 app.listen(3000, () => {

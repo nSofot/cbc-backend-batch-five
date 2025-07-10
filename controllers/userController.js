@@ -232,24 +232,26 @@ export async function resetPassword(req, res) {
 }
 
 
-// export async function getUsers(req, res) {
-//     try {
-//         const users = isAdmin(req) ? await User.find() : await User.find({ isActive: true });
-//         res.json(users);
-//     } catch (err) {
-//         res.status(500).json({ message: "Error getting users", error: err });
-//     }
-// }
-
 export function getUser(req, res) {
     if (req.user === null || req.user === undefined) {
         return res.status(403).json({ message: "You are not authorized to perform this action" });
     }
 
-    console.log(req.user);
     return res.json({
         ...req.user
     });
+}
+
+
+export function getAllUsers(req, res) {
+    if (req.user === null || req.user === undefined) {
+        return res.status(403).json({ message: "You are not authorized to perform this action" });
+    }
+    if (req.user.role.toLowerCase() === "admin") {
+        User.find()
+            .then(users => res.json(users))
+            .catch(err => res.status(500).json({ message: "Error getting users", error: err }));
+    }
 }
 
 
