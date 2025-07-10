@@ -1,4 +1,3 @@
-import { syncIndexes } from "mongoose";
 import Product from "../models/product.js";
 import { isAdmin } from "./userController.js";
 
